@@ -1,0 +1,35 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "ClubApi (https)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build ClubApi",
+      "program": "${workspaceFolder}/ClubApi/bin/Debug/net10.0/ClubApi.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/ClubApi",
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7240;http://localhost:5090"
+      }
+    },
+    {
+      "name": "ClubApi (https) + refresh firewall",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Update firewall then build",
+      "program": "${workspaceFolder}/ClubApi/bin/Debug/net10.0/ClubApi.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/ClubApi",
+      "stopAtEntry": false,
+      "console": "integratedTerminal",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "https://localhost:7240;http://localhost:5090"
+      }
+    }
+  ]
+}

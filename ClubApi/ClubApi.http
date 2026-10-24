@@ -1,0 +1,56 @@
+@baseUrl = https://localhost:7240
+@projectId = 1
+
+### Get all projects (200)
+GET {{baseUrl}}/api/projects
+Accept: application/json
+
+### Create a project (201 + Location)
+POST {{baseUrl}}/api/projects
+Content-Type: application/json
+
+{
+  "name": "Campus Finder"
+}
+
+### Get a project by ID (200)
+GET {{baseUrl}}/api/projects/{{projectId}}
+Accept: application/json
+
+### Update a project (204)
+PUT {{baseUrl}}/api/projects/{{projectId}}
+Content-Type: application/json
+
+{
+  "name": "Campus Finder Updated"
+}
+
+### Delete a project (204)
+DELETE {{baseUrl}}/api/projects/{{projectId}}
+
+### Empty name is invalid (400)
+POST {{baseUrl}}/api/projects
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### Whitespace-only name is invalid (400)
+POST {{baseUrl}}/api/projects
+Content-Type: application/json
+
+{
+  "name": "   "
+}
+
+### Missing project (404)
+GET {{baseUrl}}/api/projects/999999
+Accept: application/json
+
+### Unsupported content type (415)
+POST {{baseUrl}}/api/projects
+
+{
+  "name": "Content type demonstration"
+}

@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build ClubApi",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/ClubApi/ClubApi.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Update SQL firewall (current IP)",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Update-SqlFirewall.ps1"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Update firewall then build",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Update SQL firewall (current IP)",
+        "build ClubApi"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "test ClubApi",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "${workspaceFolder}/ClubApi.Tests/ClubApi.Tests.csproj"
+      ],
+      "group": "test",
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
