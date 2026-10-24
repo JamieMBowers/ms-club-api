@@ -28,9 +28,10 @@ dotnet add .\ClubApi\ClubApi.csproj package Microsoft.EntityFrameworkCore.Design
 dotnet add .\ClubApi\ClubApi.csproj package Microsoft.EntityFrameworkCore.Tools --version 10.0.13
 ```
 
-The built-in OpenAPI endpoint is available in Development at
-`https://localhost:7240/openapi/v1.json`. Built-in OpenAPI generation does not
-include a Swagger browser UI.
+In Development, this app provides a
+[Scalar interactive API page](https://localhost:7240/scalar/v1) for exploring
+and calling endpoints, backed by the
+[OpenAPI JSON document](https://localhost:7240/openapi/v1.json).
 
 ## Configure Azure SQL locally
 
@@ -42,11 +43,14 @@ configuration stays out of source files:
 
 ```powershell
 az login
+az account set --subscription "<YOUR_SUBSCRIPTION_ID>"
 dotnet user-secrets set "ConnectionStrings:ClubDb" "Server=tcp:<YOUR_SERVER>.database.windows.net,1433;Initial Catalog=<YOUR_DATABASE>;Authentication=Active Directory Default;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;" --project .\ClubApi\ClubApi.csproj
 ```
 
-The signed-in account must have access to the database (here, it is the
-server's Entra admin). Do not put connection strings in `appsettings.json`,
+The signed-in account must have access to the database, for example as the
+server's configured Entra admin. Azure subscription ownership alone does not
+grant SQL data access. Students must use their own server/database names and
+apply the existing migrations to their new database. Do not put connection strings in `appsettings.json`,
 `appsettings.Development.json`, source code, or `ClubApi.http`.
 
 ### Azure SQL firewall (changing IP addresses)
@@ -59,10 +63,39 @@ run this script from the workspace root before working or presenting:
 .\scripts\Update-SqlFirewall.ps1
 ```
 
-It replaces a single rule named `dev-laptop` with your current public IP, so
-old addresses do not accumulate. It may take a few minutes to take effect. If
+The first run prompts for your subscription ID, resource group, SQL server,
+database, and a laptop-specific firewall rule name (default `dev-<computer-name>`).
+It validates the selected target and asks for confirmation, then saves the
+resource identifiers in the Git-ignored
+[`scripts/sql-firewall.local.json`](../scripts/sql-firewall.local.json).
+Later runs reuse that file; `-Configure` starts setup again.
+
+It updates only your named rule to your current public IPv4 address.
+**All other firewall rules are preserved**, including other students' rules
+and manually added client rules. Remove obsolete rules manually if needed.
+The script explicitly scopes Azure commands and token acquisition to the
+selected subscription; it does not switch the CLI's active subscription,
+create resources, or update the API's user-secrets.
+See the [student setup instructions](../README.md#1-refresh-the-azure-sql-firewall-rule-and-wake-the-database)
+for parameters and non-interactive use.
+
+It may take a few minutes for firewall changes to take effect. If
 PowerShell blocks the script, run
 `powershell -ExecutionPolicy Bypass -File .\scripts\Update-SqlFirewall.ps1`.
+
+After updating the firewall, the script uses your Azure CLI login to run a
+read-only `SELECT 1` against your selected database, waking it if paused. The API does not
+need to be running. Wait for the database-ready message before sending API
+requests. Transient SQL errors are retried up to 12 attempts, 10 seconds apart;
+other errors stop immediately. A failed warm-up leaves the firewall update
+in place.
+
+The free offer and auto-pause settings are unchanged. Warm-up consumes some
+free monthly compute allowance and cannot bypass a pause due to exhaustion
+of that allowance. The probe closes its connection so auto-pause still works.
+Use `-SkipDatabaseWarmup` for firewall-only updates. The VS Code firewall task
+also performs this warm-up, but does not prompt: run the **Configure SQL
+firewall and warm-up** task first to save your settings.
 
 The firewall and authentication are separate: the firewall decides which
 network can reach the server, and Entra ID decides who can log in.
@@ -70,9 +103,10 @@ network can reach the server, and Entra ID decides who can log in.
 ### Migrations
 
 The `InitialCreate` migration creates the `Projects` table (identity `Id`
-primary key, required `Name` up to 100 characters) and **has been applied** to
-the Azure SQL database. Do not run `migrations add InitialCreate` again. To
-apply migrations to a fresh database:
+primary key, required `Name` up to 100 characters). It has already been
+applied to the instructor's database, but students must apply it to their own
+database. Do not run `migrations add InitialCreate` again. After configuring
+your own connection string, apply the existing migrations:
 
 ```powershell
 dotnet ef database update --project .\ClubApi\ClubApi.csproj
@@ -92,7 +126,10 @@ dotnet run --project .\ClubApi\ClubApi.csproj --launch-profile https
 ```
 
 The existing HTTPS launch profile uses port `7240`; HTTP uses port `5090`.
-OpenAPI JSON in Development: `https://localhost:7240/openapi/v1.json`.
+Open <https://localhost:7240/scalar/v1> in your browser to try the API in
+Development. Raw OpenAPI JSON is at <https://localhost:7240/openapi/v1.json>.
+The base address `https://localhost:7240/` has no homepage and returns
+**404 Not Found**; this is expected and does not indicate a startup failure.
 
 For a browser frontend, configure an explicit allowed origin. Set
 `FRONTEND_ORIGIN` in the API process environment, or configure

@@ -8,5 +8,5 @@
 **/secrets.json
 **/local.settings.json
 
-# Local Azure SQL firewall updater; don't publish this machine-specific helper.
-/scripts/Update-SqlFirewall.ps1
+# Each student's local Azure SQL target settings.
+/scripts/sql-firewall.local.json

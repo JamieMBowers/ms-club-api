@@ -25,8 +25,26 @@
         "-ExecutionPolicy",
         "Bypass",
         "-File",
-        "${workspaceFolder}/scripts/Update-SqlFirewall.ps1"
+        "${workspaceFolder}/scripts/Update-SqlFirewall.ps1",
+        "-NonInteractive"
       ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Configure SQL firewall and warm-up",
+      "type": "process",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "${workspaceFolder}/scripts/Update-SqlFirewall.ps1",
+        "-Configure"
+      ],
+      "presentation": {
+        "reveal": "always",
+        "focus": true
+      },
       "problemMatcher": []
     },
     {
