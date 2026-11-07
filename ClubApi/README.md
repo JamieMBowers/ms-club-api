@@ -177,20 +177,6 @@ present.
   the approved migration has been applied, the database user's table
   permissions, and Azure SQL permissions.
 
-## Optional Azure Functions demo
-
-`ClubFunctions` is a separate isolated-worker demonstration; it is not part of
-the CRUD API. Install Azure Functions Core Tools v4, then run:
-
-```powershell
-func start --script-root .\ClubFunctions
-```
-
-With the default Functions route prefix, the demo is
-`GET http://localhost:7071/api/projects/ping` and returns
-`{"message":"Club API ready"}`. The ASP.NET Core API remains the main CRUD
-service.
-
 ## Security and production notes
 
 - HTTPS is enabled in the development launch profiles.
@@ -211,8 +197,7 @@ service.
 - Authentication and authorization are not implemented. Add Microsoft Entra ID
   authentication and endpoint authorization as a deliberate next step; no fake
   authentication is used here.
-- Host the ASP.NET Core API on Azure App Service. Host the optional demonstration
-  separately on Azure Functions only if needed.
+- Host the ASP.NET Core API on Azure App Service.
 
 ## Automated tests
 

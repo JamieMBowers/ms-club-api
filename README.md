@@ -1,7 +1,6 @@
 # ClubApi workshop
 
-This workspace contains the ASP.NET Core API (`ClubApi`), its automated tests,
-and an optional Azure Functions demo.
+This workspace contains the ASP.NET Core API (`ClubApi`) and its automated tests.
 
 ## Run locally
 
@@ -117,8 +116,8 @@ REST Client extension to send requests. Stop the API with **Ctrl+C**.
 Debug settings are in `.vscode\launch.json` and `.vscode\tasks.json`. They
 need the **C# Dev Kit** (or **C#**) extension.
 
-The workspace loads `ClubApi.sln`, which includes the API, tests, and optional
-Functions project. If VS Code still reports a missing `ms_club_api.csproj`
+The workspace loads `ClubApi.sln`, which includes the API and tests.
+If VS Code still reports a missing `ms_club_api.csproj`
 after the project rename, open the Command Palette (**Ctrl+Shift+P**) and run
 **Developer: Reload Window** to reload the current solution.
 
