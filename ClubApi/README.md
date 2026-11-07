@@ -3,6 +3,10 @@
 ClubApi is a beginner-friendly ASP.NET Core 10 controller API for creating,
 reading, updating, and deleting projects stored in Azure SQL Database.
 
+**New to the workshop? Start with the [complete student setup guide](../README.md).**
+It covers cloning both repositories, preparing your own database, starting the
+two apps, and a browser exercise. This file is the backend reference.
+
 ## Architecture
 
 `Client → ProjectsController → ProjectService → ClubDb → Azure SQL`
@@ -13,20 +17,23 @@ returns response DTOs rather than exposing EF Core entities.
 
 ## Required software
 
-- .NET 10 SDK
-- Visual Studio Code
+- .NET 10 SDK (not just the runtime)
+- Git, Azure CLI, Windows PowerShell, and a browser
+- Visual Studio Code (optional)
 - Azure SQL Database and permission to connect to it
 - VS Code REST Client extension (optional, for `ClubApi.http`)
-- EF Core command-line tool for migrations: `dotnet tool install --global dotnet-ef`
+- EF Core command-line tool for migrations:
+  `dotnet tool install --global dotnet-ef --version 10.0.13`
 
 The project targets `net10.0`. Its EF Core SQL Server, Design, and Tools packages
-are all version `10.0.13`. To install them manually from the workspace root:
+are all version `10.0.13` and are already declared in the project. Normal
+build/run commands restore them; students do not need to add the packages again.
+If `dotnet-ef` is already installed, the
+[student setup guide](../README.md#d-create-the-tables-using-the-existing-migration)
+shows how to select the matching tool version.
 
-```powershell
-dotnet add .\ClubApi\ClubApi.csproj package Microsoft.EntityFrameworkCore.SqlServer --version 10.0.13
-dotnet add .\ClubApi\ClubApi.csproj package Microsoft.EntityFrameworkCore.Design --version 10.0.13
-dotnet add .\ClubApi\ClubApi.csproj package Microsoft.EntityFrameworkCore.Tools --version 10.0.13
-```
+All commands in this file run from the **backend repository root**, the folder
+containing `ClubApi.sln`, not from inside the `ClubApi` subfolder.
 
 In Development, this app provides a
 [Scalar interactive API page](https://localhost:7240/scalar/v1) for exploring
@@ -34,6 +41,10 @@ and calling endpoints, backed by the
 [OpenAPI JSON document](https://localhost:7240/openapi/v1.json).
 
 ## Configure Azure SQL locally
+
+Create or select your own Azure SQL database first; see
+[step 3 of the student guide](../README.md#3-configure-your-azure-sql-database).
+The app and firewall script do not provision Azure resources.
 
 The Azure SQL server uses **Microsoft Entra ID-only authentication**, so there
 is no SQL username or password. The app signs in as whoever is logged in to the
@@ -76,7 +87,7 @@ and manually added client rules. Remove obsolete rules manually if needed.
 The script explicitly scopes Azure commands and token acquisition to the
 selected subscription; it does not switch the CLI's active subscription,
 create resources, or update the API's user-secrets.
-See the [student setup instructions](../README.md#1-refresh-the-azure-sql-firewall-rule-and-wake-the-database)
+See the [student setup instructions](../README.md#b-sign-in-allow-your-laptop-and-wake-the-database)
 for parameters and non-interactive use.
 
 It may take a few minutes for firewall changes to take effect. If
@@ -109,8 +120,12 @@ database. Do not run `migrations add InitialCreate` again. After configuring
 your own connection string, apply the existing migrations:
 
 ```powershell
-dotnet ef database update --project .\ClubApi\ClubApi.csproj
+dotnet ef database update --project .\ClubApi\ClubApi.csproj -- --environment Development
 ```
+
+The explicit Development environment loads the API's local user-secrets.
+The API does not apply migrations on startup. A new database has an empty
+`Projects` table; adding records through the frontend is part of the exercise.
 
 Never use `EnsureDeleted`, do not use `EnsureCreated` with Azure SQL, and do
 not roll back migrations or drop tables without reviewing the effect first.
@@ -131,7 +146,20 @@ Development. Raw OpenAPI JSON is at <https://localhost:7240/openapi/v1.json>.
 The base address `https://localhost:7240/` has no homepage and returns
 **404 Not Found**; this is expected and does not indicate a startup failure.
 
-For a browser frontend, configure an explicit allowed origin. Set
+Check <https://localhost:7240/api/projects> as well: `[]` or an array of records
+confirms a successful database read. Loading Scalar alone does not check the
+database. Next, start the separate
+[Blazor frontend](https://github.com/JamieMBowers/ms_club_blazor_frontend)
+and open <https://localhost:7260/> for the forms and list.
+
+### CORS and the Blazor frontend
+
+The workshop frontend uses **Blazor Interactive Server**. Its API client runs
+on the server, so **no CORS configuration is needed for this frontend**.
+It needs only the API base URL, never a SQL connection string.
+
+For a different frontend that calls the API directly from browser JavaScript,
+configure an explicit allowed origin. Set
 `FRONTEND_ORIGIN` in the API process environment, or configure
 `Cors:AllowedOrigins` in the host's environment/configuration. In PowerShell,
 for the current session:
@@ -140,7 +168,7 @@ for the current session:
 $env:FRONTEND_ORIGIN = "<YOUR_FRONTEND_URL>"
 ```
 
-With no allowed origin configured, browser cross-origin requests are denied.
+With no allowed origin configured, direct browser cross-origin requests are denied.
 The app never enables `AllowAnyOrigin`.
 
 ## Try the API
