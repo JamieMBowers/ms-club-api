@@ -337,8 +337,42 @@ Do not expose it publicly or use it for sensitive data without adding security.
 
 ## Debug in VS Code
 
+Open each repository folder in its own VS Code window, not both solutions
+in the backend window. From the folder containing your two clones:
+
+```powershell
+code --new-window .\ms_club_api
+code --new-window .\ms_club_blazor_frontend
+```
+
+If the backend folder is already open, only run the second command.
+Each window has its own terminal, solution, and debug configuration. Keep
+frontend source and tests in the frontend repository; do not add them to
+`ClubApi.sln`. If you previously opened a combined solution, run
+**Developer: Reload Window** after separating it.
+
 Debug settings are in `.vscode\launch.json` and `.vscode\tasks.json`. They
 need the **C# Dev Kit** (or **C#**) extension.
+
+### Student startup checklist
+
+Complete the first-time setup in step 3 before using this checklist.
+
+1. Open the backend folder in one VS Code window and the frontend folder in
+   another.
+2. In the backend window's terminal, run
+   `.\scripts\Update-SqlFirewall.ps1`. Wait for the **database-ready message**.
+   If your Azure login has expired, run `az login` first.
+3. In the backend **Run and Debug** view, select **ClubApi (https)** and
+   press **F5**. Wait for the listening message.
+4. In the frontend **Run and Debug** view, select **ClubWeb (https)** and
+   press **F5**.
+5. Open **<https://localhost:7260/>** and keep both apps running.
+
+If Windows blocks a file from running, follow
+[If Windows blocks execution](#if-windows-blocks-execution) below.
+
+### Debugging details
 
 The published backend solution, `ClubApi.sln`, includes the API and API tests.
 The frontend has its own solution in the separate frontend repository.
@@ -355,6 +389,12 @@ after the project rename, open the Command Palette (**Ctrl+Shift+P**) and run
      period.
 3. Press **F5**.
 
+In the frontend window, select **ClubWeb (https)** and press **F5**, then open
+<https://localhost:7260/>. Start the API first to load project data. You can
+build, debug, and stop each application independently; stopping the API leaves
+the frontend running but its data requests will fail until the API restarts.
+Do not also run `dotnet watch` or `dotnet run` for an app already under F5.
+
 Set breakpoints by clicking left of a line number, for example in
 `ClubApi\Controllers\ProjectsController.cs`. Then send a request from
 `ClubApi\ClubApi.http`; execution pauses at the breakpoint.
@@ -370,6 +410,31 @@ script in a terminal). The configure task prompts for your Azure settings.
 
 If VS Code says the HTTPS certificate isn't trusted, run
 `dotnet dev-certs https --trust` once and accept the prompt.
+
+## If Windows blocks execution
+
+**Error `0x800711C7` means Windows Application Control blocked a file from
+running.** This is a Windows security-policy restriction, not a compiler error
+or an Azure SQL firewall error.
+
+During our local setup, both solutions **built successfully**, but Windows
+blocked the **test assemblies**. No tests executed, so their results could not
+be verified. This does **not** establish that the API or frontend is blocked
+too; try the normal startup checklist and check the actual error.
+
+If you see this error:
+
+1. Stop retrying the blocked command. Save the error code, blocked file name,
+   and what you were trying to run. Do not share passwords or access tokens.
+2. Ask your teacher or IT administrator for help. They can inspect
+   **Event Viewer > Applications and Services Logs > Microsoft > Windows >
+   CodeIntegrity > Operational** and determine which development files or
+   tools need approval under the device's policy.
+3. After approval, retry the same command or F5 launch. If tests were blocked,
+   rerun them and confirm that tests actually execute.
+
+**Do not disable Windows security or download unofficial "fix" tools.**
+Changing Azure SQL firewall rules will not fix this Windows execution block.
 
 ## Run tests
 
